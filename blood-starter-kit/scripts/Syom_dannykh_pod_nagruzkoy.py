@@ -3,11 +3,8 @@ import numpy as np
 import spidev
 import time
 
-maxvoltage = 3.3
 vals = []
 times = []
-#Массив маркеров настроишь на основании полученных данных
-#markers_on = [int(i) for i in range(0,20000,100)]
 
 spi = spidev.SpiDev()
 spi.open(0, 0)
@@ -17,48 +14,47 @@ def getAdc():
     adcResponse = spi.xfer2([0, 0])
     return ((adcResponse[0] & 0x1F) << 8 | adcResponse[1]) >> 1
 
+
 try:
     start_time = time.time()
-    for i in range(20000):
+    for i in range(360000):
         value = getAdc()
-        vals.append(getAdc())
+        vals.append(value)
         timer = time.time() - start_time
         times.append(timer)
-
 
     vals = np.array(vals)
     times = np.array(times)
 
-
-    vals = vals * 0.104154818757622 -13.66429084810035
+    vals = vals * 0.104154818757622 - 13.66429084810035
 finally:
-    #Просто, чтобы сразу было видно, работает ли всё
-    print(vals)
+    # Просто, чтобы сразу было видно, работает ли всё
+    # print(vals)
     print(times)
 
     fig, ax = plt.subplots(figsize=(12, 9))
-    ax.plot(vals, times,
-        linestyle = '-',
-        linewidth = 1,
-        marker = 's',
-        #markevery=markers_on,
-        color = 'darkmagenta')
-    ax.set_title('Артериальное давление с нагрузкой', style='italic')
-    ax.legend(labels = ("Артериальное давление"), loc = "upper right")
-    ax.set_xlabel('Давление (мм рт ст)')
-    ax.set_ylabel('время (с)')
-    #ax.figure(figsize=(10, 7))
+    ax.plot(times, vals,
+            linestyle='-',
+            linewidth=1,
+            # markevery=markers_on,
+            color='darkmagenta')
+    ax.set_title('Артериальное давление под нагрузкой', style='italic')
+    ax.legend(labels=("Артериальное давление"), loc="upper right")
+    ax.set_ylabel('Давление (мм рт ст)')
+    ax.set_xlabel('время (с)')
+    # ax.figure(figsize=(10, 7))
     ax.axes.grid(
-        which = "major",
-        linewidth = "0.4",
+        which="major",
+        linewidth="0.4",
     )
     ax.minorticks_on()
     ax.axes.grid(
-        which = "minor",
-        linewidth = "0.2"
+        which="minor",
+        linewidth="0.2"
     )
 
-    plt.savefig('/home/gr106/Desktop/blood-starter-kit/plots/fitness-pressure.png')
+    # укажи путь к папке для сохранения графика
+    plt.savefig('/home/gr106/Desktop/blood-starter-kit/plots/fitness.png')
     plt.show()
     number = len(times)
     samplingperiod = times[number - 1] / number
@@ -76,7 +72,6 @@ finally:
         with open("/home/gr106/Desktop/blood-starter-kit/data/fitness.txt", "a") as f:
             f.write(str(vals[i]) + " " + str(times[i]) + "\n")
     spi.close()
-
 
 
 
